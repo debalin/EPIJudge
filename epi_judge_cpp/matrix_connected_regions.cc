@@ -5,9 +5,49 @@
 #include "test_framework/timed_executor.h"
 using std::deque;
 using std::vector;
+using std::queue;
+using std::pair;
 
-void FlipColor(int x, int y, vector<deque<bool>>* image_ptr) {
-  // TODO - you fill in here.
+vector<int> g_dx{1, -1, 0, 0};
+vector<int> g_dy{0, 0, 1, -1};
+
+bool OutOfBounds(const pair<int, int>& coordinate, int rowSize, int colSize)
+{
+  return coordinate.first < 0 || coordinate.first >= rowSize || coordinate.second < 0 || coordinate.second >= colSize;
+}
+
+void FlipColor(int x, int y, vector<deque<bool>>* image_ptr) 
+{
+  auto& image = *image_ptr;
+
+  queue<pair<int, int>> bfsQ;
+  int rowSize = image.size(), colSize = image[0].size();
+  bool regionColor = image[x][y]; // true is white, false is black.
+
+  // Init queue with the start coordinate.
+  bfsQ.push({x, y});
+  image[x][y] = !regionColor;
+  while (!bfsQ.empty())
+  {
+    // Pop the front of the queue and set visited.
+    auto current = bfsQ.front();
+    bfsQ.pop();
+
+    // If the neighbors are within bounds and within region
+    // add them to the queue.
+    for (size_t i = 0; i < g_dx.size(); i++)
+    {
+      pair<int, int> neighbor{current.first + g_dx[i], current.second + g_dy[i]};
+
+      if (!OutOfBounds(neighbor, rowSize, colSize) &&
+        image[neighbor.first][neighbor.second] == regionColor)
+      {
+        bfsQ.push(neighbor);
+        image[neighbor.first][neighbor.second] = !regionColor;
+      }
+    }
+  }
+
   return;
 }
 vector<vector<int>> FlipColorWrapper(TimedExecutor& executor, int x, int y,

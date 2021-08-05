@@ -2472,7 +2472,7 @@ problem_mapping = {
         },
         "18.02 Paint a Boolean matrix": {
             "C++: matrix_connected_regions.cc": {
-                "passed": 0,
+                "passed": 50,
                 "total": 50
             },
             "Java: MatrixConnectedRegions.java": {
@@ -2486,7 +2486,7 @@ problem_mapping = {
         },
         "18.03 Compute enclosed regions": {
             "C++: matrix_enclosed_regions.cc": {
-                "passed": 0,
+                "passed": 51,
                 "total": 51
             },
             "Java: MatrixEnclosedRegions.java": {
@@ -2542,7 +2542,7 @@ problem_mapping = {
         },
         "18.07 Transform one string to another": {
             "C++: string_transformability.cc": {
-                "passed": 0,
+                "passed": 48,
                 "total": 48
             },
             "Java: StringTransformability.java": {

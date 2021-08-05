@@ -6,11 +6,90 @@
 #include "test_framework/timed_executor.h"
 using std::string;
 using std::vector;
+using std::queue;
+using std::pair;
 
-void FillSurroundedRegions(vector<vector<char>>* board_ptr) {
-  // TODO - you fill in here.
+vector<int> g_dx{1, -1, 0, 0};
+vector<int> g_dy{0, 0, 1, -1};
+
+bool OutOfBounds(const pair<int, int>& coordinate, int rowSize, int colSize)
+{
+  return coordinate.first < 0 || coordinate.first >= rowSize || coordinate.second < 0 || coordinate.second >= colSize;
+}
+
+void MakeRegionGrey(vector<vector<char>>& board, int x, int y)
+{
+  // BFS starting at x, y to convert region to grey.
+  int rowSize = board.size(), colSize = board[0].size();
+  queue<pair<int, int>> bfsQ;
+  bfsQ.push({x, y});
+
+  board[x][y] = 'G';
+
+  while (!bfsQ.empty())
+  {
+    auto current = bfsQ.front();
+    bfsQ.pop();
+
+    for (int k = 0; k < g_dx.size(); k++)
+    {
+      pair<int, int> neighbor{current.first + g_dx[k], current.second + g_dy[k]};
+      if (!OutOfBounds(neighbor, rowSize, colSize) &&
+        board[neighbor.first][neighbor.second] == 'W')
+      {
+        bfsQ.push(neighbor);
+        board[neighbor.first][neighbor.second] = 'G';
+      }
+    }
+  }
+}
+
+void FillSurroundedRegions(vector<vector<char>>* board_ptr) 
+{
+  auto& board = *board_ptr;
+  int rowSize = board.size(), colSize = board[0].size();
+
+  // Convert the white regions starting at borders into grey regions.
+  for (int i = 0; i < rowSize; i++)
+  {
+    for (int j = 0; j < colSize; j = j + colSize - 1)
+    {
+      if (board[i][j] == 'W')
+      {
+        MakeRegionGrey(board, i, j);
+      }
+    }
+  }
+  for (int j = 0; j < colSize; j++)
+  {
+    for (int i = 0; i < rowSize; i = i + rowSize - 1)
+    {
+      if (board[i][j] == 'W')
+      {
+        MakeRegionGrey(board, i, j);
+      }
+    }
+  }
+
+  // Convert all remaining white cells to black, and grey cells back to white.
+  for (int i = 0; i < rowSize; i++)
+  {
+    for (int j = 0; j < colSize; j++)
+    {
+      if (board[i][j] == 'W')
+      {
+        board[i][j] = 'B';
+      }
+      else if (board[i][j] == 'G')
+      {
+        board[i][j] = 'W';
+      }
+    }
+  }
+
   return;
 }
+
 vector<vector<string>> FillSurroundedRegionsWrapper(
     TimedExecutor& executor, vector<vector<string>> board) {
   vector<vector<char>> char_vector;

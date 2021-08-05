@@ -65,19 +65,18 @@ int ManhattanDistance(const Coordinate& c, const Coordinate& e)
 }
 
 vector<Coordinate> FindWithAStar(
-  const vector<vector<Color>>& maze, 
+  vector<vector<Color>>& maze, 
   const Coordinate& start, 
   const Coordinate& end)
 {
   priority_queue<AStarNode, vector<AStarNode>, MaxComparator> aStarQ;
   unordered_map<Coordinate, Coordinate, hash_coordinate> predecessor;
   int rowSize = maze.size(), colSize = maze[0].size();
-  vector<vector<bool>> visited(rowSize, vector<bool>(colSize, false));
   bool foundPath = false;
 
   // Init queue. 
   aStarQ.emplace(start, 0, ManhattanDistance(start, end));
-  visited[start.x][start.y] = true;
+  maze[start.x][start.y] = Color::kBlack;
   while (!aStarQ.empty())
   {
     // The current node is showing the best chance of 
@@ -101,8 +100,7 @@ vector<Coordinate> FindWithAStar(
       Coordinate neighbor{current.C.x + g_dx[i], current.C.y + g_dy[i]};
 
       if (!neighbor.OutOfBounds(rowSize, colSize) &&
-        maze[neighbor.x][neighbor.y] == Color::kWhite &&
-        !visited[neighbor.x][neighbor.y])
+        maze[neighbor.x][neighbor.y] == Color::kWhite)
       {
         // Store how we reached neighbor from current.
         // Because we won't search through the same node
@@ -110,7 +108,7 @@ vector<Coordinate> FindWithAStar(
         predecessor[neighbor] = current.C;
 
         aStarQ.emplace(neighbor, current.PathCost + 1, ManhattanDistance(neighbor, end));
-        visited[neighbor.x][neighbor.y] = true;
+        maze[neighbor.x][neighbor.y] = Color::kBlack;
       }
     }
   }
@@ -138,19 +136,18 @@ vector<Coordinate> FindWithAStar(
 }
 
 vector<Coordinate> FindWithBFS(
-  const vector<vector<Color>>& maze, 
+  vector<vector<Color>>& maze, 
   const Coordinate& start, 
   const Coordinate& end)
 {
   queue<Coordinate> bfsQ;
   unordered_map<Coordinate, Coordinate, hash_coordinate> predecessor;
   int rowSize = maze.size(), colSize = maze[0].size();
-  vector<vector<bool>> visited(rowSize, vector<bool>(colSize, false));
   bool foundPath = false;
 
   // Init queue with the start coordinate.
   bfsQ.push(start);
-  visited[start.x][start.y] = true;
+  maze[start.x][start.y] = Color::kBlack;
   while (!bfsQ.empty())
   {
     // Pop the front of the queue and set visited.
@@ -172,8 +169,7 @@ vector<Coordinate> FindWithBFS(
       Coordinate neighbor{current.x + g_dx[i], current.y + g_dy[i]};
 
       if (!neighbor.OutOfBounds(rowSize, colSize) &&
-        maze[neighbor.x][neighbor.y] == Color::kWhite &&
-        !visited[neighbor.x][neighbor.y])
+        maze[neighbor.x][neighbor.y] == Color::kWhite)
       {
         // Store how we reached neighbor from current.
         // Because we won't search through the same node
@@ -181,7 +177,7 @@ vector<Coordinate> FindWithBFS(
         predecessor[neighbor] = current;
 
         bfsQ.push(neighbor);
-        visited[neighbor.x][neighbor.y] = true;
+        maze[neighbor.x][neighbor.y] = Color::kBlack;
       }
     }
   }
@@ -208,11 +204,10 @@ vector<Coordinate> FindWithBFS(
   }
 }
 
-vector<Coordinate> FindWithDFS(
-  const vector<vector<Color>>& maze, 
+vector<Coordinate> FindWithDFSHelper(
+  vector<vector<Color>>& maze, 
   const Coordinate& current, 
-  const Coordinate& end,
-  vector<vector<bool>>& visited)
+  const Coordinate& end)
 {
   if (current == end)
   {
@@ -220,8 +215,8 @@ vector<Coordinate> FindWithDFS(
     return {end};
   }  
 
-  // Update visited matrix.
-  visited[current.x][current.y] = true;
+  // Turn maze cell to black to denote that you have visited it.
+  maze[current.x][current.y] = Color::kBlack;
 
   // Recursively search all neighbors of current coordinate.
   for (size_t i = 0; i < g_dx.size(); i++)
@@ -229,10 +224,9 @@ vector<Coordinate> FindWithDFS(
     Coordinate neighbor{current.x + g_dx[i], current.y + g_dy[i]};
 
     if (!neighbor.OutOfBounds(maze.size(), maze[0].size()) &&
-      maze[neighbor.x][neighbor.y] == Color::kWhite &&
-      !visited[neighbor.x][neighbor.y])
+      maze[neighbor.x][neighbor.y] == Color::kWhite)
     {
-      auto result = FindWithDFS(maze, neighbor, end, visited);
+      auto result = FindWithDFSHelper(maze, neighbor, end);
       if (!result.empty())
       {
         result.push_back(current);
@@ -245,12 +239,11 @@ vector<Coordinate> FindWithDFS(
 }
 
 vector<Coordinate> FindWithDFS(
-  const vector<vector<Color>>& maze, 
+  vector<vector<Color>>& maze, 
   const Coordinate& start, 
   const Coordinate& end)
 {
-  vector<vector<bool>> visited(maze.size(), vector<bool>(maze[0].size(), false));
-  auto path = FindWithDFS(maze, start, end, visited);
+  auto path = FindWithDFSHelper(maze, start, end);
   std::reverse(path.begin(), path.end());
 
   return path;
@@ -258,11 +251,11 @@ vector<Coordinate> FindWithDFS(
 
 vector<Coordinate> SearchMaze(vector<vector<Color>> maze, const Coordinate& s,
                               const Coordinate& e) {
-  auto path = FindWithDFS(maze, s, e);
+  // auto path = FindWithDFS(maze, s, e);
 
   // auto path = FindWithBFS(maze, s, e);
 
-  // auto path = FindWithAStar(maze, s, e);
+  auto path = FindWithAStar(maze, s, e);
 
   return path;
 }
