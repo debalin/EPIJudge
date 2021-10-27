@@ -7,9 +7,10 @@
         {
             "name": "(gdb) Attach",
             "type": "cppdbg",
-            "request": "attach",
-            "program": "${workspaceFolder}/epi_judge_cpp/search_maze.exe",
-            "processId": "${command:pickProcess}",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/epi_judge_cpp/dutch_national_flag.exe",
+            //"processId": "${command:pickProcess}",
             "MIMode": "gdb",
             "miDebuggerPath": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\gdb.exe",
             "setupCommands": [

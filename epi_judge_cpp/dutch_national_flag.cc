@@ -7,10 +7,58 @@
 using std::vector;
 enum class Color { kRed, kWhite, kBlue };
 
-void DutchFlagPartition(int pivot_index, vector<Color>* A_ptr) {
-  // TODO - you fill in here.
+vector<Color>::iterator PartitionColors(vector<Color>::iterator it1, vector<Color>::iterator it2, const std::function<bool(Color)>& predicate)
+{
+  if (it1 >= it2)
+  {
+    return it1;
+  }
+
+  auto begin = it1;
+  auto end = it2;
+
+  it2--;
+  while (it1 < it2)
+  {
+    while (it1 != end &&
+      predicate(*it1))
+    {
+      it1++;
+    }
+
+    while (it2 != begin &&
+      !predicate(*it2))
+    {
+      it2--;
+    }
+
+    if (it1 < it2)
+    {
+      std::iter_swap(it1, it2);
+    }
+  }
+
+  return it1;
+}
+
+void DutchFlagPartition(int pivot_index, vector<Color>* A_ptr) 
+{
+  vector<Color>& A = *A_ptr;
+  Color pivotColor = A[pivot_index];
+
+  auto rightSideStart = PartitionColors(A.begin(), A.end(), [&](Color color)
+  {
+    return color < pivotColor;
+  });
+
+  PartitionColors(rightSideStart, A.end(), [&](Color color)
+  {
+    return color <= pivotColor;
+  });
+
   return;
 }
+
 void DutchFlagPartitionWrapper(TimedExecutor& executor, const vector<int>& A,
                                int pivot_idx) {
   vector<Color> colors;
